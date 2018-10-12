@@ -11,11 +11,16 @@ using Synapse.Core.Utilities;
 using Synapse.Services;
 using Synapse.Services.Controller.Dal;
 
+using zf = Zephyr.Filesystem;
+
 
 //namespace Synapse.Services.Controller.Dal { }
 public partial class AwsS3Dal : IControllerDal
 {
     static readonly string CurrentPath = $"{Path.GetDirectoryName( typeof( AwsS3Dal ).Assembly.Location )}";
+
+    private zf.AwsClient _awsClient;
+    private string _bucketName = null;
 
     string _planPath = null;
     string _histPath = null;
@@ -25,6 +30,7 @@ public partial class AwsS3Dal : IControllerDal
 
     //this is a stub feature
     static long PlanInstanceIdCounter = DateTime.Now.Ticks;
+
 
     public AwsS3Dal()
     {
@@ -61,6 +67,10 @@ public partial class AwsS3Dal : IControllerDal
             string s = YamlHelpers.Serialize( conifg.Config );
             AwsS3DalConfig fsds = YamlHelpers.Deserialize<AwsS3DalConfig>( s );
 
+            _awsClient = new zf.AwsClient( "", "", null );
+
+            _bucketName = fsds.BucketName;
+
             _planPath = fsds.PlanFolderPath;
             _histPath = fsds.HistoryFolderPath;
             _splxPath = fsds.Security.FilePath;
@@ -90,6 +100,7 @@ public partial class AwsS3Dal : IControllerDal
         Dictionary<string, string> props = new Dictionary<string, string>
         {
             { name, CurrentPath },
+            { $"{name} Bucket Name", _bucketName },
             { $"{name} Plan path", _planPath },
             { $"{name} History path", _histPath },
             { $"{name} Security path", _splxPath }
@@ -125,15 +136,27 @@ public partial class AwsS3Dal : IControllerDal
         if( Path.GetFullPath( _splxPath ) != _splxPath )
             _splxPath = Utilities.PathCombine( CurrentPath, _splxPath, "\\" );
 
-        Directory.CreateDirectory( _planPath );
-        Directory.CreateDirectory( _histPath );
+        zf.AwsS3ZephyrDirectory s3zd = new zf.AwsS3ZephyrDirectory( _awsClient );
+
+        s3zd.FullName = _planPath;
+        if( !s3zd.Exists )
+            s3zd.Create();
+
+        s3zd.FullName = _histPath;
+        if( !s3zd.Exists )
+            s3zd.Create();
     }
 
     void LoadSuplex()
     {
         string splx = Utilities.PathCombine( _splxPath, "security.splx" );
-        if( File.Exists( splx ) )
-            _splxDal = new SuplexDal( splx );
+        zf.AwsS3ZephyrFile s3splx = new zf.AwsS3ZephyrFile( _awsClient, splx );
+        if( s3splx.Exists )
+        {
+            string storeData = s3splx.ReadAllText();
+            _splxDal = new SuplexDal();
+            _splxDal.LoadStoreData( storeData );
+        }
     }
 
 
