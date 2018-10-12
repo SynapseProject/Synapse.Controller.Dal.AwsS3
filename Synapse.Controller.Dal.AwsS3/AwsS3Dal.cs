@@ -76,7 +76,11 @@ public partial class AwsS3Dal : IControllerDal
             AwsS3DalConfig fsds = YamlHelpers.Deserialize<AwsS3DalConfig>( s );
 
             _region = Amazon.RegionEndpoint.USEast1.ToString();
-            _awsClient = new zf.AwsClient( fsds.AwsAccessKey, fsds.AwsSecretAccessKey, Amazon.RegionEndpoint.USEast1 );
+
+            if( !string.IsNullOrWhiteSpace( fsds.AwsAccessKey ) || !string.IsNullOrWhiteSpace( fsds.AwsSecretAccessKey ) )
+                _awsClient = new zf.AwsClient( Amazon.RegionEndpoint.USEast1 );
+            else
+                _awsClient = new zf.AwsClient( fsds.AwsAccessKey, fsds.AwsSecretAccessKey, Amazon.RegionEndpoint.USEast1 );
 
             _bucketName = fsds.DefaultBucketName;
 

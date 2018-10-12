@@ -7,7 +7,7 @@ namespace Synapse.Services.Controller.Dal
     {
         public string AwsAccessKey { get; set; }
         public string AwsSecretAccessKey { get; set; }
-        public string DefaultBucketName { get; set; }
+        public string DefaultBucketName { get; set; } = "s3://myBucketName";
         public string PlanFolderPath { get; set; } = "Plans";
         public string HistoryFolderPath { get; set; } = "History";
         public bool ProcessPlansOnSingleton { get; set; } = false;
