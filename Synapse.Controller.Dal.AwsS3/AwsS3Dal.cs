@@ -21,6 +21,7 @@ public partial class AwsS3Dal : IControllerDal
 
     private zf.AwsClient _awsClient;
     private string _bucketName = null;
+    private string _region = null;
 
     string _planPath = null;
     string _histPath = null;
@@ -36,14 +37,21 @@ public partial class AwsS3Dal : IControllerDal
     {
     }
 
-    internal AwsS3Dal(string basePath, bool processPlansOnSingleton = false, bool processActionsOnSingleton = true) : this()
+    internal AwsS3Dal(string basePath, string accessKey, string secretAccessKey,
+        bool processPlansOnSingleton = false, bool processActionsOnSingleton = true) : this()
     {
         if( string.IsNullOrWhiteSpace( basePath ) )
             basePath = CurrentPath;
 
-        _planPath = $"{basePath}\\Plans\\";
-        _histPath = $"{basePath}\\History\\";
-        _splxPath = $"{basePath}\\Security\\";
+        _region = Amazon.RegionEndpoint.USEast1.ToString();
+        _awsClient = new zf.AwsClient( accessKey, secretAccessKey, Amazon.RegionEndpoint.USEast1 );
+
+        _bucketName = basePath;
+
+
+        _planPath = $"{basePath}/Plans/";
+        _histPath = $"{basePath}/History/";
+        _splxPath = $"{basePath}/Security/";
 
         EnsurePaths();
 
@@ -67,7 +75,8 @@ public partial class AwsS3Dal : IControllerDal
             string s = YamlHelpers.Serialize( conifg.Config );
             AwsS3DalConfig fsds = YamlHelpers.Deserialize<AwsS3DalConfig>( s );
 
-            _awsClient = new zf.AwsClient( "", "", null );
+            _region = Amazon.RegionEndpoint.USEast1.ToString();
+            _awsClient = new zf.AwsClient( fsds.AwsAccessKey, fsds.AwsSecretAccessKey, Amazon.RegionEndpoint.USEast1 );
 
             _bucketName = fsds.BucketName;
 
@@ -100,7 +109,8 @@ public partial class AwsS3Dal : IControllerDal
         Dictionary<string, string> props = new Dictionary<string, string>
         {
             { name, CurrentPath },
-            { $"{name} Bucket Name", _bucketName },
+            { $"{name} AWS Region", _region },
+            { $"{name} S3 Bucket Name", _bucketName },
             { $"{name} Plan path", _planPath },
             { $"{name} History path", _histPath },
             { $"{name} Security path", _splxPath }
@@ -110,9 +120,9 @@ public partial class AwsS3Dal : IControllerDal
 
     internal void ConfigureDefaults()
     {
-        _planPath = $"{CurrentPath}\\Plans\\";
-        _histPath = $"{CurrentPath}\\History\\";
-        _splxPath = $"{CurrentPath}\\Security\\";
+        _planPath = $"{CurrentPath}/Plans/";
+        _histPath = $"{CurrentPath}/History/";
+        _splxPath = $"{CurrentPath}/Security/";
 
         EnsurePaths();
 
@@ -127,14 +137,14 @@ public partial class AwsS3Dal : IControllerDal
         //GetFullPath tests below validate the paths are /complete/ paths.  IsPathRooted returns 'true'
         //in a few undesriable cases
 
-        if( Path.GetFullPath( _planPath ) != _planPath )
-            _planPath = Utilities.PathCombine( CurrentPath, _planPath, "\\" );
+        ////if( Path.GetFullPath( _planPath ) != _planPath )
+        ////    _planPath = Utilities.PathCombine( CurrentPath, _planPath, "/" );
 
-        if( Path.GetFullPath( _histPath ) != _histPath )
-            _histPath = Utilities.PathCombine( CurrentPath, _histPath, "\\" );
+        ////if( Path.GetFullPath( _histPath ) != _histPath )
+        ////    _histPath = Utilities.PathCombine( CurrentPath, _histPath, "/" );
 
-        if( Path.GetFullPath( _splxPath ) != _splxPath )
-            _splxPath = Utilities.PathCombine( CurrentPath, _splxPath, "\\" );
+        ////if( Path.GetFullPath( _splxPath ) != _splxPath )
+        ////    _splxPath = Utilities.PathCombine( CurrentPath, _splxPath, "/" );
 
         zf.AwsS3ZephyrDirectory s3zd = new zf.AwsS3ZephyrDirectory( _awsClient );
 
@@ -149,7 +159,8 @@ public partial class AwsS3Dal : IControllerDal
 
     void LoadSuplex()
     {
-        string splx = Utilities.PathCombine( _splxPath, "security.splx" );
+        zf.AwsS3ZephyrDirectory splxFolder = new zf.AwsS3ZephyrDirectory( _awsClient, _splxPath );
+        string splx = splxFolder.PathCombine( _splxPath, "security.splx" );
         zf.AwsS3ZephyrFile s3splx = new zf.AwsS3ZephyrFile( _awsClient, splx );
         if( s3splx.Exists )
         {

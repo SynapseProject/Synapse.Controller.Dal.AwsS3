@@ -11,6 +11,8 @@ using Synapse.Core.Utilities;
 using Synapse.Services;
 using Synapse.Services.Controller.Dal;
 
+using zf = Zephyr.Filesystem;
+
 
 //namespace Synapse.Services.Controller.Dal { }
 public partial class AwsS3Dal : IControllerDal
@@ -56,7 +58,7 @@ public partial class AwsS3Dal : IControllerDal
     {
         if( string.IsNullOrEmpty( filter ) )
         {
-            return Directory.GetFiles( _planPath, "*.yaml" ).Select( f => Path.GetFileNameWithoutExtension( f ) );
+            return DirectoryGetFiles( _planPath, ".yaml" ).Select( f => Path.GetFileNameWithoutExtension( f ) );
         }
         else
         {
@@ -76,7 +78,7 @@ public partial class AwsS3Dal : IControllerDal
 
             Regex regex = new Regex( filter, RegexOptions.IgnoreCase );
 
-            return Directory.GetFiles( _planPath ).Where( f => regex.IsMatch( Path.GetFileName( f ) ) )
+            return DirectoryGetFiles( _planPath ).Where( f => regex.IsMatch( Path.GetFileName( f ) ) )
                 .Select( f => Path.GetFileNameWithoutExtension( f ) );
         }
     }
@@ -84,7 +86,7 @@ public partial class AwsS3Dal : IControllerDal
     public IEnumerable<long> GetPlanInstanceIdList(string planUniqueName)
     {
         Regex regex = new Regex( $@"^{planUniqueName}(_\d+\.yaml)$", RegexOptions.IgnoreCase );
-        IEnumerable<string> files = Directory.GetFiles( _histPath )
+        IEnumerable<string> files = DirectoryGetFiles( _histPath )
             .Where( f => regex.IsMatch( Path.GetFileName( f ) ) )
             .Select( f => Path.GetFileNameWithoutExtension( f ) );
 
@@ -102,16 +104,14 @@ public partial class AwsS3Dal : IControllerDal
 
     public Plan GetPlan(string planUniqueName)
     {
-        //_splxDal?.TrySecurityOrException( securityContext, planUniqueName, AceType.FileSystem, FileSystemRight.Execute, "Plan" );
-
-        string planFile = Utilities.PathCombine( _planPath, $"{planUniqueName}.yaml" );
-        return YamlHelpers.DeserializeFile<Plan>( planFile );
+        string planFile = UtilitiesPathCombine( _planPath, $"{planUniqueName}.yaml" );
+        return DeserializeYamlFile<Plan>( planFile );
     }
 
     public Plan CreatePlanInstance(string planUniqueName)
     {
-        string planFile = Utilities.PathCombine( _planPath, $"{planUniqueName}.yaml" );
-        Plan plan = YamlHelpers.DeserializeFile<Plan>( planFile );
+        string planFile = UtilitiesPathCombine( _planPath, $"{planUniqueName}.yaml" );
+        Plan plan = DeserializeYamlFile<Plan>( planFile );
 
         if( string.IsNullOrWhiteSpace( plan.UniqueName ) )
             plan.UniqueName = planUniqueName;
@@ -122,8 +122,8 @@ public partial class AwsS3Dal : IControllerDal
 
     public Plan GetPlanStatus(string planUniqueName, long planInstanceId)
     {
-        string planFile = Utilities.PathCombine( _histPath, $"{planUniqueName}_{planInstanceId}.yaml" );
-        return YamlHelpers.DeserializeFile<Plan>( planFile );
+        string planFile = UtilitiesPathCombine( _histPath, $"{planUniqueName}_{planInstanceId}.yaml" );
+        return DeserializeYamlFile<Plan>( planFile );
     }
 
     public void UpdatePlanStatus(Plan plan)
@@ -140,7 +140,7 @@ public partial class AwsS3Dal : IControllerDal
     {
         try
         {
-            YamlHelpers.SerializeFile( Utilities.PathCombine( _histPath, $"{item.Plan.UniqueName}_{item.Plan.InstanceId}.yaml" ),
+            SerializeYamlFile( UtilitiesPathCombine( _histPath, $"{item.Plan.UniqueName}_{item.Plan.InstanceId}.yaml" ),
                 item.Plan, emitDefaultValues: true );
         }
         catch( Exception ex )
@@ -176,7 +176,7 @@ public partial class AwsS3Dal : IControllerDal
             Plan plan = GetPlanStatus( item.PlanUniqueName, item.PlanInstanceId );
             bool ok = DalUtilities.FindActionAndReplace( plan.Actions, item.ActionItem );
             if( ok )
-                YamlHelpers.SerializeFile( Utilities.PathCombine( _histPath, $"{plan.UniqueName}_{plan.InstanceId}.yaml" ), plan, emitDefaultValues: true );
+                SerializeYamlFile( UtilitiesPathCombine( _histPath, $"{plan.UniqueName}_{plan.InstanceId}.yaml" ), plan, emitDefaultValues: true );
             else
                 throw new Exception( $"Could not find Plan.InstanceId = [{item.PlanInstanceId}], Action:{item.ActionItem.Name}.ParentInstanceId = [{item.ActionItem.ParentInstanceId}] in Plan outfile." );
         }
@@ -190,4 +190,45 @@ public partial class AwsS3Dal : IControllerDal
                 ActionItemSingletonProcessor.Instance.Fatal.Enqueue( ex );
         }
     }
+
+
+    #region utilities
+    void SerializeYamlFile(string path, object data, bool serializeAsJson = false, bool formatJson = true, bool emitDefaultValues = false)
+    {
+        string yaml = YamlHelpers.Serialize( data, emitDefaultValues: true );
+        zf.AwsS3ZephyrFile s3zf = new zf.AwsS3ZephyrFile( _awsClient, path );
+        s3zf.WriteAllText( yaml );
+    }
+
+    T DeserializeYamlFile<T>(string path)
+    {
+        zf.AwsS3ZephyrFile s3zf = new zf.AwsS3ZephyrFile( _awsClient, path );
+        string yaml = s3zf.ReadAllText();
+        return YamlHelpers.Deserialize<T>( yaml );
+    }
+
+    IEnumerable<string> DirectoryGetFiles(string path, string searchPattern = null)
+    {
+        zf.AwsS3ZephyrDirectory s3zd = new zf.AwsS3ZephyrDirectory( _awsClient, path );
+        IEnumerable<zf.ZephyrFile> zfs = s3zd.GetFiles();
+        List<string> files = new List<string>();
+        if( !string.IsNullOrWhiteSpace( searchPattern ) )
+        {
+            foreach( zf.ZephyrFile z in zfs )
+                if( z.Name.EndsWith( searchPattern, StringComparison.OrdinalIgnoreCase ) )
+                    files.Add( z.FullName );
+        }
+        else
+            foreach( zf.ZephyrFile z in zfs )
+                files.Add( z.FullName );
+
+        return files;
+    }
+
+    string UtilitiesPathCombine(params string[] paths)
+    {
+        zf.AwsS3ZephyrDirectory splxFolder = new zf.AwsS3ZephyrDirectory( _awsClient, paths[0] );
+        return splxFolder.PathCombine( paths );
+    }
+    #endregion
 }
