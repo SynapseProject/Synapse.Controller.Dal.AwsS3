@@ -5,9 +5,9 @@ namespace Synapse.Services.Controller.Dal
 {
     public class AwsS3DalConfig
     {
-        public string BucketName { get; set; }
         public string AwsAccessKey { get; set; }
         public string AwsSecretAccessKey { get; set; }
+        public string DefaultBucketName { get; set; }
         public string PlanFolderPath { get; set; } = "Plans";
         public string HistoryFolderPath { get; set; } = "History";
         public bool ProcessPlansOnSingleton { get; set; } = false;

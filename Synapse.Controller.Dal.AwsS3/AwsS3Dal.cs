@@ -78,7 +78,7 @@ public partial class AwsS3Dal : IControllerDal
             _region = Amazon.RegionEndpoint.USEast1.ToString();
             _awsClient = new zf.AwsClient( fsds.AwsAccessKey, fsds.AwsSecretAccessKey, Amazon.RegionEndpoint.USEast1 );
 
-            _bucketName = fsds.BucketName;
+            _bucketName = fsds.DefaultBucketName;
 
             _planPath = fsds.PlanFolderPath;
             _histPath = fsds.HistoryFolderPath;
@@ -120,9 +120,9 @@ public partial class AwsS3Dal : IControllerDal
 
     internal void ConfigureDefaults()
     {
-        _planPath = $"{CurrentPath}/Plans/";
-        _histPath = $"{CurrentPath}/History/";
-        _splxPath = $"{CurrentPath}/Security/";
+        _planPath = $"{_bucketName}/Plans/";
+        _histPath = $"{_bucketName}/History/";
+        _splxPath = $"{_bucketName}/Security/";
 
         EnsurePaths();
 
@@ -134,17 +134,16 @@ public partial class AwsS3Dal : IControllerDal
 
     void EnsurePaths()
     {
-        //GetFullPath tests below validate the paths are /complete/ paths.  IsPathRooted returns 'true'
-        //in a few undesriable cases
+        const string s3 = "s3://";
 
-        ////if( Path.GetFullPath( _planPath ) != _planPath )
-        ////    _planPath = Utilities.PathCombine( CurrentPath, _planPath, "/" );
+        if( !_planPath.StartsWith( s3, StringComparison.OrdinalIgnoreCase ) )
+            _planPath = UtilitiesPathCombine( _bucketName, _planPath );
 
-        ////if( Path.GetFullPath( _histPath ) != _histPath )
-        ////    _histPath = Utilities.PathCombine( CurrentPath, _histPath, "/" );
+        if( !_histPath.StartsWith( s3, StringComparison.OrdinalIgnoreCase ) )
+            _histPath = UtilitiesPathCombine( _bucketName, _histPath );
 
-        ////if( Path.GetFullPath( _splxPath ) != _splxPath )
-        ////    _splxPath = Utilities.PathCombine( CurrentPath, _splxPath, "/" );
+        if( !_splxPath.StartsWith( s3, StringComparison.OrdinalIgnoreCase ) )
+            _splxPath = UtilitiesPathCombine( _bucketName, _splxPath );
 
         zf.AwsS3ZephyrDirectory s3zd = new zf.AwsS3ZephyrDirectory( _awsClient );
 
