@@ -10,6 +10,7 @@ namespace Synapse.Services.Controller.Dal
         public string DefaultBucketName { get; set; } = "s3://myBucketName";
         public string PlanFolderPath { get; set; } = "Plans";
         public string HistoryFolderPath { get; set; } = "History";
+        public bool WriteHistoryAsCompressedJson { get; set; }
         public bool ProcessPlansOnSingleton { get; set; } = false;
         public bool ProcessActionsOnSingleton { get; set; } = true;
 

@@ -25,6 +25,7 @@ public partial class AwsS3Dal : IControllerDal
 
     string _planPath = null;
     string _histPath = null;
+    bool _histAsJson = false;
     string _splxPath = null;
 
     SuplexDal _splxDal = null;
@@ -77,7 +78,7 @@ public partial class AwsS3Dal : IControllerDal
 
             _region = Amazon.RegionEndpoint.USEast1.ToString();
 
-            if( !string.IsNullOrWhiteSpace( fsds.AwsAccessKey ) || !string.IsNullOrWhiteSpace( fsds.AwsSecretAccessKey ) )
+            if( string.IsNullOrWhiteSpace( fsds.AwsAccessKey ) || string.IsNullOrWhiteSpace( fsds.AwsSecretAccessKey ) )
                 _awsClient = new zf.AwsClient( Amazon.RegionEndpoint.USEast1 );
             else
                 _awsClient = new zf.AwsClient( fsds.AwsAccessKey, fsds.AwsSecretAccessKey, Amazon.RegionEndpoint.USEast1 );
@@ -86,6 +87,7 @@ public partial class AwsS3Dal : IControllerDal
 
             _planPath = fsds.PlanFolderPath;
             _histPath = fsds.HistoryFolderPath;
+            _histAsJson = fsds.WriteHistoryAsCompressedJson;
             _splxPath = fsds.Security.FilePath;
 
             EnsurePaths();

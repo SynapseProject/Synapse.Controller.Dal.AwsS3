@@ -141,7 +141,7 @@ public partial class AwsS3Dal : IControllerDal
         try
         {
             SerializeYamlFile( UtilitiesPathCombine( _histPath, $"{item.Plan.UniqueName}_{item.Plan.InstanceId}.yaml" ),
-                item.Plan, emitDefaultValues: true );
+                item.Plan, serializeAsJson: _histAsJson, emitDefaultValues: true );
         }
         catch( Exception ex )
         {
@@ -195,7 +195,7 @@ public partial class AwsS3Dal : IControllerDal
     #region utilities
     void SerializeYamlFile(string path, object data, bool serializeAsJson = false, bool formatJson = true, bool emitDefaultValues = false)
     {
-        string yaml = YamlHelpers.Serialize( data, emitDefaultValues: true );
+        string yaml = YamlHelpers.Serialize( data, serializeAsJson: serializeAsJson, emitDefaultValues: true );
         zf.AwsS3ZephyrFile s3zf = new zf.AwsS3ZephyrFile( _awsClient, path );
         s3zf.WriteAllText( yaml );
     }
