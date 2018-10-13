@@ -104,14 +104,22 @@ public partial class AwsS3Dal : IControllerDal
 
     public Plan GetPlan(string planUniqueName)
     {
-        string planFile = UtilitiesPathCombine( _planPath, $"{planUniqueName}.yaml" );
-        return DeserializeYamlFile<Plan>( planFile );
+        List<string> files = DirectoryGetFiles( _planPath )
+            .Where( f => Path.GetFileName( f ).Equals( $"{planUniqueName}.yaml", StringComparison.OrdinalIgnoreCase ) )
+            .Select( f => Path.GetFileName( f ) ).ToList();
+
+        if( files.Count == 1 )
+        {
+            string planFile = UtilitiesPathCombine( _planPath, files[0] );
+            return DeserializeYamlFile<Plan>( planFile );
+        }
+        else
+            throw new FileNotFoundException( $"Could not load {planUniqueName}.  Found {files.Count} name matches." );
     }
 
     public Plan CreatePlanInstance(string planUniqueName)
     {
-        string planFile = UtilitiesPathCombine( _planPath, $"{planUniqueName}.yaml" );
-        Plan plan = DeserializeYamlFile<Plan>( planFile );
+        Plan plan = GetPlan( planUniqueName );
 
         if( string.IsNullOrWhiteSpace( plan.UniqueName ) )
             plan.UniqueName = planUniqueName;
@@ -122,8 +130,17 @@ public partial class AwsS3Dal : IControllerDal
 
     public Plan GetPlanStatus(string planUniqueName, long planInstanceId)
     {
-        string planFile = UtilitiesPathCombine( _histPath, $"{planUniqueName}_{planInstanceId}{_histExt}" );
-        return DeserializeYamlFile<Plan>( planFile );
+        List<string> files = DirectoryGetFiles( _histPath )
+            .Where( f => Path.GetFileName( f ).Equals( $"{planUniqueName}_{planInstanceId}{_histExt}", StringComparison.OrdinalIgnoreCase ) )
+            .Select( f => Path.GetFileName( f ) ).ToList();
+
+        if( files.Count == 1 )
+        {
+            string planFile = UtilitiesPathCombine( _histPath, files[0] );
+            return DeserializeYamlFile<Plan>( planFile );
+        }
+        else
+            throw new FileNotFoundException( $"Could not load {planUniqueName}_{planInstanceId}.  Found {files.Count} name matches." );
     }
 
     public void UpdatePlanStatus(Plan plan)
