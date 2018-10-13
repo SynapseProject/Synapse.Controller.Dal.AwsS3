@@ -26,6 +26,8 @@ public partial class AwsS3Dal : IControllerDal
     string _planPath = null;
     string _histPath = null;
     bool _histAsJson = false;
+    bool _histAsFormattedJson = false;
+    string _histExt = ".yaml";
     string _splxPath = null;
 
     SuplexDal _splxDal = null;
@@ -87,7 +89,9 @@ public partial class AwsS3Dal : IControllerDal
 
             _planPath = fsds.PlanFolderPath;
             _histPath = fsds.HistoryFolderPath;
-            _histAsJson = fsds.WriteHistoryAsCompressedJson;
+            _histAsJson = fsds.WriteHistoryAs == HistorySerializationFormat.FormattedJson || fsds.WriteHistoryAs == HistorySerializationFormat.CompressedJson;
+            _histAsFormattedJson = fsds.WriteHistoryAs == HistorySerializationFormat.FormattedJson;
+            _histExt = _histAsJson ? ".json" : ".yaml";
             _splxPath = fsds.Security.FilePath;
 
             EnsurePaths();

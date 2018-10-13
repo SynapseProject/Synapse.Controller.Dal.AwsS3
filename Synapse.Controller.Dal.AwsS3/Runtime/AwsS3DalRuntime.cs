@@ -85,7 +85,7 @@ public partial class AwsS3Dal : IControllerDal
 
     public IEnumerable<long> GetPlanInstanceIdList(string planUniqueName)
     {
-        Regex regex = new Regex( $@"^{planUniqueName}(_\d+\.yaml)$", RegexOptions.IgnoreCase );
+        Regex regex = new Regex( $@"^{planUniqueName}(_\d+\{_histExt})$", RegexOptions.IgnoreCase );
         IEnumerable<string> files = DirectoryGetFiles( _histPath )
             .Where( f => regex.IsMatch( Path.GetFileName( f ) ) )
             .Select( f => Path.GetFileNameWithoutExtension( f ) );
@@ -122,7 +122,7 @@ public partial class AwsS3Dal : IControllerDal
 
     public Plan GetPlanStatus(string planUniqueName, long planInstanceId)
     {
-        string planFile = UtilitiesPathCombine( _histPath, $"{planUniqueName}_{planInstanceId}.yaml" );
+        string planFile = UtilitiesPathCombine( _histPath, $"{planUniqueName}_{planInstanceId}{_histExt}" );
         return DeserializeYamlFile<Plan>( planFile );
     }
 
@@ -140,8 +140,8 @@ public partial class AwsS3Dal : IControllerDal
     {
         try
         {
-            SerializeYamlFile( UtilitiesPathCombine( _histPath, $"{item.Plan.UniqueName}_{item.Plan.InstanceId}.yaml" ),
-                item.Plan, serializeAsJson: _histAsJson, emitDefaultValues: true );
+            SerializeYamlFile( UtilitiesPathCombine( _histPath, $"{item.Plan.UniqueName}_{item.Plan.InstanceId}{_histExt}" ),
+                item.Plan, serializeAsJson: _histAsJson, formatJson: _histAsFormattedJson, emitDefaultValues: true );
         }
         catch( Exception ex )
         {
@@ -176,7 +176,8 @@ public partial class AwsS3Dal : IControllerDal
             Plan plan = GetPlanStatus( item.PlanUniqueName, item.PlanInstanceId );
             bool ok = DalUtilities.FindActionAndReplace( plan.Actions, item.ActionItem );
             if( ok )
-                SerializeYamlFile( UtilitiesPathCombine( _histPath, $"{plan.UniqueName}_{plan.InstanceId}.yaml" ), plan, emitDefaultValues: true );
+                SerializeYamlFile( UtilitiesPathCombine( _histPath, $"{plan.UniqueName}_{plan.InstanceId}{_histExt}" ),
+                    plan, serializeAsJson: _histAsJson, formatJson: _histAsFormattedJson, emitDefaultValues: true );
             else
                 throw new Exception( $"Could not find Plan.InstanceId = [{item.PlanInstanceId}], Action:{item.ActionItem.Name}.ParentInstanceId = [{item.ActionItem.ParentInstanceId}] in Plan outfile." );
         }
@@ -195,7 +196,7 @@ public partial class AwsS3Dal : IControllerDal
     #region utilities
     void SerializeYamlFile(string path, object data, bool serializeAsJson = false, bool formatJson = true, bool emitDefaultValues = false)
     {
-        string yaml = YamlHelpers.Serialize( data, serializeAsJson: serializeAsJson, emitDefaultValues: true );
+        string yaml = YamlHelpers.Serialize( data, serializeAsJson: serializeAsJson, formatJson: formatJson, emitDefaultValues: true );
         zf.AwsS3ZephyrFile s3zf = new zf.AwsS3ZephyrFile( _awsClient, path );
         s3zf.WriteAllText( yaml );
     }
