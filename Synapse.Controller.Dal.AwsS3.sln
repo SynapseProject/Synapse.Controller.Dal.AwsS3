@@ -5,6 +5,11 @@ VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Controller.Dal.AwsS3", "Synapse.Controller.Dal.AwsS3\Synapse.Controller.Dal.AwsS3.csproj", "{9BC9D97B-8F39-408C-B6DE-0E6371C69B25}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{3883C904-0575-4374-BD80-A5D59E56E6B0}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\AssemblyInfo.xml = scripts\AssemblyInfo.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
