@@ -9,12 +9,12 @@ using Synapse.Services.Controller.Dal;
 using zf = Zephyr.Filesystem;
 
 
-//namespace Synapse.Services.Controller.Dal { }
 public partial class AwsS3Dal : IControllerDal
 {
     static readonly string CurrentPath = $"{Path.GetDirectoryName( typeof( AwsS3Dal ).Assembly.Location )}";
 
     private zf.AwsClient _awsClient;
+    private Amazon.S3.AmazonS3Client _s3Client = null;
     private string _bucketName = null;
     private string _region = null;
 
@@ -23,9 +23,12 @@ public partial class AwsS3Dal : IControllerDal
     bool _histAsJson = false;
     bool _histAsFormattedJson = false;
     string _histExt = ".yaml";
+
     string _splxPath = null;
+    DateTime _splxLastWriteTime = DateTime.MinValue;
 
     SuplexDal _splxDal = null;
+    System.Timers.Timer SuplexPoller { get; set; }
 
     //this is a stub feature
     static long PlanInstanceIdCounter = DateTime.Now.Ticks;
@@ -33,6 +36,9 @@ public partial class AwsS3Dal : IControllerDal
 
     public AwsS3Dal()
     {
+        //todo: SNS instead of hand-rolled poller
+        SuplexPoller = new System.Timers.Timer( 1000 );
+        SuplexPoller.Elapsed += (s, e) => LoadSuplex();
     }
 
     internal AwsS3Dal(string basePath, string accessKey, string secretAccessKey,
@@ -74,9 +80,15 @@ public partial class AwsS3Dal : IControllerDal
             _region = Amazon.RegionEndpoint.USEast1.ToString();
 
             if( string.IsNullOrWhiteSpace( fsds.AwsAccessKey ) || string.IsNullOrWhiteSpace( fsds.AwsSecretAccessKey ) )
+            {
                 _awsClient = new zf.AwsClient( Amazon.RegionEndpoint.USEast1 );
+                _s3Client = new Amazon.S3.AmazonS3Client( Amazon.RegionEndpoint.USEast1 );
+            }
             else
+            {
                 _awsClient = new zf.AwsClient( fsds.AwsAccessKey, fsds.AwsSecretAccessKey, Amazon.RegionEndpoint.USEast1 );
+                _s3Client = new Amazon.S3.AmazonS3Client( fsds.AwsAccessKey, fsds.AwsSecretAccessKey, Amazon.RegionEndpoint.USEast1 );
+            }
 
             _bucketName = fsds.DefaultBucketName;
 
@@ -167,11 +179,26 @@ public partial class AwsS3Dal : IControllerDal
         string splxFile = DirectoryGetFile( _splxPath, "security.splx", throwFileNotFoundException: false );
         if( splxFile != null )
         {
+            SuplexPoller.Enabled = true;
+
             zf.AwsS3ZephyrFile s3splx = new zf.AwsS3ZephyrFile( _awsClient, splxFile );
-            string storeData = s3splx.ReadAllText();
-            _splxDal = new SuplexDal();
-            _splxDal.LoadStoreData( storeData );
+            DateTime lastWriteTime = GetFileDetails( s3splx ).LastWriteTime;
+            if( _splxLastWriteTime != lastWriteTime )
+            {
+                _splxLastWriteTime = lastWriteTime;
+
+                if( _splxDal == null )
+                    _splxDal = new SuplexDal();
+
+                string storeData = s3splx.ReadAllText();
+                _splxDal.LoadStoreData( storeData );
+            }
         }
+    }
+
+    Amazon.S3.IO.S3FileInfo GetFileDetails(zf.AwsS3ZephyrFile awsS3zfile)
+    {
+        return new Amazon.S3.IO.S3FileInfo( _s3Client, awsS3zfile.BucketName, awsS3zfile.ObjectKey );
     }
 
 

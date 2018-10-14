@@ -13,7 +13,6 @@ using Synapse.Services.Controller.Dal;
 using zf = Zephyr.Filesystem;
 
 
-//namespace Synapse.Services.Controller.Dal { }
 public partial class AwsS3Dal : IControllerDal
 {
     public bool HasAccess(string securityContext, string planUniqueName, FileSystemRight right = FileSystemRight.Execute)
