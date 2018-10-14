@@ -104,17 +104,8 @@ public partial class AwsS3Dal : IControllerDal
 
     public Plan GetPlan(string planUniqueName)
     {
-        List<string> files = DirectoryGetFiles( _planPath )
-            .Where( f => Path.GetFileName( f ).Equals( $"{planUniqueName}.yaml", StringComparison.OrdinalIgnoreCase ) )
-            .Select( f => Path.GetFileName( f ) ).ToList();
-
-        if( files.Count == 1 )
-        {
-            string planFile = UtilitiesPathCombine( _planPath, files[0] );
-            return DeserializeYamlFile<Plan>( planFile );
-        }
-        else
-            throw new FileNotFoundException( $"Could not load {planUniqueName}.  Found {files.Count} name matches." );
+        string planFile = DirectoryGetFile( _planPath, $"{planUniqueName}.yaml" );
+        return DeserializeYamlFile<Plan>( planFile );
     }
 
     public Plan CreatePlanInstance(string planUniqueName)
@@ -130,17 +121,8 @@ public partial class AwsS3Dal : IControllerDal
 
     public Plan GetPlanStatus(string planUniqueName, long planInstanceId)
     {
-        List<string> files = DirectoryGetFiles( _histPath )
-            .Where( f => Path.GetFileName( f ).Equals( $"{planUniqueName}_{planInstanceId}{_histExt}", StringComparison.OrdinalIgnoreCase ) )
-            .Select( f => Path.GetFileName( f ) ).ToList();
-
-        if( files.Count == 1 )
-        {
-            string planFile = UtilitiesPathCombine( _histPath, files[0] );
-            return DeserializeYamlFile<Plan>( planFile );
-        }
-        else
-            throw new FileNotFoundException( $"Could not load {planUniqueName}_{planInstanceId}.  Found {files.Count} name matches." );
+        string planFile = DirectoryGetFile( _histPath, $"{planUniqueName}_{planInstanceId}{_histExt}" );
+        return DeserializeYamlFile<Plan>( planFile );
     }
 
     public void UpdatePlanStatus(Plan plan)
@@ -214,39 +196,65 @@ public partial class AwsS3Dal : IControllerDal
     void SerializeYamlFile(string path, object data, bool serializeAsJson = false, bool formatJson = true, bool emitDefaultValues = false)
     {
         string yaml = YamlHelpers.Serialize( data, serializeAsJson: serializeAsJson, formatJson: formatJson, emitDefaultValues: true );
-        zf.AwsS3ZephyrFile s3zf = new zf.AwsS3ZephyrFile( _awsClient, path );
-        s3zf.WriteAllText( yaml );
+        zf.AwsS3ZephyrFile file = new zf.AwsS3ZephyrFile( _awsClient, path );
+        file.WriteAllText( yaml );
     }
 
     T DeserializeYamlFile<T>(string path)
     {
-        zf.AwsS3ZephyrFile s3zf = new zf.AwsS3ZephyrFile( _awsClient, path );
-        string yaml = s3zf.ReadAllText();
+        zf.AwsS3ZephyrFile file = new zf.AwsS3ZephyrFile( _awsClient, path );
+        string yaml = file.ReadAllText();
         return YamlHelpers.Deserialize<T>( yaml );
     }
 
+    /// <summary>
+    /// Case-insensitive search a folder for an exact filename match
+    /// </summary>
+    /// <param name="path">Folder to search</param>
+    /// <param name="fileName">Filename to match</param>
+    /// <returns>The matching case-sensitive path or throws FileNotFoundException</returns>
+    string DirectoryGetFile(string path, string fileName)
+    {
+        zf.AwsS3ZephyrDirectory dir = new zf.AwsS3ZephyrDirectory( _awsClient, path );
+
+        List<string> files = dir.GetFiles()
+            .Where( f => f.Name.Equals( fileName, StringComparison.OrdinalIgnoreCase ) )
+            .Select( f => f.Name ).ToList();
+
+        if( files.Count == 1 )
+            return UtilitiesPathCombine( path, files[0] );
+        else
+            throw new FileNotFoundException( $"Could not load {fileName}.  Found {files.Count} name matches." );
+    }
+
+    /// <summary>
+    /// Case-insensitive search a folder for a list of matching files
+    /// </summary>
+    /// <param name="path">Folder to search</param>
+    /// <param name="searchPattern">Optional suffix to match</param>
+    /// <returns>A list of matching files</returns>
     IEnumerable<string> DirectoryGetFiles(string path, string searchPattern = null)
     {
-        zf.AwsS3ZephyrDirectory s3zd = new zf.AwsS3ZephyrDirectory( _awsClient, path );
-        IEnumerable<zf.ZephyrFile> zfs = s3zd.GetFiles();
-        List<string> files = new List<string>();
+        zf.AwsS3ZephyrDirectory dir = new zf.AwsS3ZephyrDirectory( _awsClient, path );
+        IEnumerable<zf.ZephyrFile> files = dir.GetFiles();
+        List<string> matches = new List<string>();
         if( !string.IsNullOrWhiteSpace( searchPattern ) )
         {
-            foreach( zf.ZephyrFile z in zfs )
+            foreach( zf.ZephyrFile z in files )
                 if( z.Name.EndsWith( searchPattern, StringComparison.OrdinalIgnoreCase ) )
-                    files.Add( z.FullName );
+                    matches.Add( z.FullName );
         }
         else
-            foreach( zf.ZephyrFile z in zfs )
-                files.Add( z.FullName );
+            foreach( zf.ZephyrFile z in files )
+                matches.Add( z.FullName );
 
-        return files;
+        return matches;
     }
 
     string UtilitiesPathCombine(params string[] paths)
     {
-        zf.AwsS3ZephyrDirectory splxFolder = new zf.AwsS3ZephyrDirectory( _awsClient, paths[0] );
-        return splxFolder.PathCombine( paths );
+        zf.AwsS3ZephyrDirectory dir = new zf.AwsS3ZephyrDirectory( _awsClient, paths[0] );
+        return dir.PathCombine( paths );
     }
     #endregion
 }
