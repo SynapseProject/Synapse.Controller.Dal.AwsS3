@@ -120,7 +120,7 @@ public partial class AwsS3Dal : IControllerDal
         {
             { name, CurrentPath },
             { $"{name} AWS Region", _region },
-            { $"{name} S3 Bucket Name", _bucketName },
+            { $"{name} S3 Default Bucket", _bucketName },
             { $"{name} Plan path", _planPath },
             { $"{name} History path", _histPath },
             { $"{name} Security path", _splxPath }
