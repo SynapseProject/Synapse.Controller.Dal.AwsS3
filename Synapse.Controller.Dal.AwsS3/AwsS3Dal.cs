@@ -50,8 +50,6 @@ public partial class AwsS3Dal : IControllerDal
         _awsClient = new zf.AwsClient( accessKey, secretAccessKey, Amazon.RegionEndpoint.USEast1 );
 
         _bucketName = basePath;
-
-
         _planPath = $"{basePath}/Plans/";
         _histPath = $"{basePath}/History/";
         _splxPath = $"{basePath}/Security/";
@@ -130,6 +128,9 @@ public partial class AwsS3Dal : IControllerDal
 
     internal void ConfigureDefaults()
     {
+        _awsClient = new zf.AwsClient( Amazon.RegionEndpoint.USEast1 );
+
+        _bucketName = "s3://need_a_valid_bucket";
         _planPath = $"{_bucketName}/Plans/";
         _histPath = $"{_bucketName}/History/";
         _splxPath = $"{_bucketName}/Security/";
