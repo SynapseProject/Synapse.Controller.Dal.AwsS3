@@ -168,11 +168,10 @@ public partial class AwsS3Dal : IControllerDal
 
     void LoadSuplex()
     {
-        zf.AwsS3ZephyrDirectory splxFolder = new zf.AwsS3ZephyrDirectory( _awsClient, _splxPath );
-        string splx = splxFolder.PathCombine( _splxPath, "security.splx" );
-        zf.AwsS3ZephyrFile s3splx = new zf.AwsS3ZephyrFile( _awsClient, splx );
-        if( s3splx.Exists )
+        string splxFile = DirectoryGetFile( _splxPath, "security.splx", throwFileNotFoundException: false );
+        if( splxFile != null )
         {
+            zf.AwsS3ZephyrFile s3splx = new zf.AwsS3ZephyrFile( _awsClient, splxFile );
             string storeData = s3splx.ReadAllText();
             _splxDal = new SuplexDal();
             _splxDal.LoadStoreData( storeData );

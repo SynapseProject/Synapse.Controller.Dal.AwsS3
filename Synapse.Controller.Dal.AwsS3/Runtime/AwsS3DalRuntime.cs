@@ -212,8 +212,8 @@ public partial class AwsS3Dal : IControllerDal
     /// </summary>
     /// <param name="path">Folder to search</param>
     /// <param name="fileName">Filename to match</param>
-    /// <returns>The matching case-sensitive path or throws FileNotFoundException</returns>
-    string DirectoryGetFile(string path, string fileName)
+    /// <returns>The matching case-sensitive path or (returns null or throws FileNotFoundException)</returns>
+    string DirectoryGetFile(string path, string fileName, bool throwFileNotFoundException = true)
     {
         zf.AwsS3ZephyrDirectory dir = new zf.AwsS3ZephyrDirectory( _awsClient, path );
 
@@ -223,8 +223,10 @@ public partial class AwsS3Dal : IControllerDal
 
         if( files.Count == 1 )
             return UtilitiesPathCombine( path, files[0] );
-        else
+        else if( throwFileNotFoundException )
             throw new FileNotFoundException( $"Could not load {fileName}.  Found {files.Count} name matches." );
+        else
+            return null;
     }
 
     /// <summary>
