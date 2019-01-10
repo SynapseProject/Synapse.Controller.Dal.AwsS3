@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Synapse.Controller.Dal.AwsS3</RootNamespace>
     <AssemblyName>Synapse.Controller.Dal.AwsS3</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,30 +35,49 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AlphaFS, Version=2.1.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
-      <HintPath>..\packages\AlphaFS.2.1.3\lib\net452\AlphaFS.dll</HintPath>
+    <Reference Include="AlphaFS, Version=2.2.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
+      <HintPath>..\packages\AlphaFS.2.2.6\lib\net452\AlphaFS.dll</HintPath>
     </Reference>
     <Reference Include="AWSSDK.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
-      <HintPath>..\packages\AWSSDK.Core.3.3.21.10\lib\net45\AWSSDK.Core.dll</HintPath>
+      <HintPath>..\packages\AWSSDK.Core.3.3.28.1\lib\net45\AWSSDK.Core.dll</HintPath>
     </Reference>
     <Reference Include="AWSSDK.S3, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
-      <HintPath>..\packages\AWSSDK.S3.3.3.17\lib\net45\AWSSDK.S3.dll</HintPath>
+      <HintPath>..\packages\AWSSDK.S3.3.3.26.1\lib\net45\AWSSDK.S3.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.MSScriptControl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Suplex.Core.4.0.0.3\lib\net40\Interop.MSScriptControl.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Suplex.Core, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Suplex.Core.4.0.0.3\lib\net40\Suplex.Core.dll</HintPath>
+    <Reference Include="Suplex.Security.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Suplex.Security.Core.1.0.18355\lib\net461\Suplex.Security.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Suplex.Security.FileSystemDal, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Suplex.Security.FileSystemDal.1.0.19001\lib\net461\Suplex.Security.FileSystemDal.dll</HintPath>
+    </Reference>
+    <Reference Include="Suplex.Security.Utilities.ActiveDirectory, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Suplex.Security.Utilities.ActiveDirectory.1.0.19009\lib\net461\Suplex.Security.Utilities.ActiveDirectory.dll</HintPath>
+    </Reference>
+    <Reference Include="Suplex.Security.Utilities.Json, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Suplex.Security.Utilities.Json.1.0.19001\lib\net461\Suplex.Security.Utilities.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Suplex.Security.Utilities.Yaml, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Suplex.Security.Utilities.Yaml.1.0.19001\lib\net461\Suplex.Security.Utilities.Yaml.dll</HintPath>
+    </Reference>
+    <Reference Include="Suplex.Security.WebApi.HttpClient, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Suplex.Security.WebApi.HttpClient.1.0.19001\lib\net461\Suplex.Security.WebApi.HttpClient.dll</HintPath>
     </Reference>
     <Reference Include="Synapse.Controller.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Synapse.Controller.Common.1.0.18105\lib\net45\Synapse.Controller.Common.dll</HintPath>
+      <HintPath>..\packages\Synapse.Controller.Common.1.0.19010\lib\net461\Synapse.Controller.Common.dll</HintPath>
     </Reference>
     <Reference Include="Synapse.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a6de1cc56b73f982, processorArchitecture=MSIL">
-      <HintPath>..\packages\Synapse.Core.Signed.1.0.18258.1\lib\net45\Synapse.Core.dll</HintPath>
+      <HintPath>..\packages\Synapse.Core.Signed.1.0.18350\lib\net461\Synapse.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -65,11 +85,11 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="YamlDotNet, Version=4.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\packages\YamlDotNet.Signed.4.0.0\lib\net35\YamlDotNet.dll</HintPath>
+    <Reference Include="YamlDotNet, Version=5.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.Signed.5.2.1\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="Zephyr.Filesystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Zephyr.FileSystem.1.0.18036.0\lib\net452\Zephyr.Filesystem.dll</HintPath>
+      <HintPath>..\packages\Zephyr.FileSystem.1.0.18296.0\lib\net452\Zephyr.Filesystem.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -80,10 +100,11 @@
     <Compile Include="Runtime\AwsS3DalRuntime.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\packages\AWSSDK.S3.3.3.17\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
+    <Analyzer Include="..\packages\AWSSDK.S3.3.3.26.1\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
