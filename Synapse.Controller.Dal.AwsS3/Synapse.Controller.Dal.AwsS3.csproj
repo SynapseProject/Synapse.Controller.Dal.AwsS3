@@ -48,28 +48,28 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Suplex.Security.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Suplex.Security.Core.1.0.18355\lib\net461\Suplex.Security.Core.dll</HintPath>
+      <HintPath>..\packages\Suplex.Security.Core.1.0.19075\lib\net461\Suplex.Security.Core.dll</HintPath>
     </Reference>
     <Reference Include="Suplex.Security.FileSystemDal, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Suplex.Security.FileSystemDal.1.0.19001\lib\net461\Suplex.Security.FileSystemDal.dll</HintPath>
+      <HintPath>..\packages\Suplex.Security.FileSystemDal.1.0.19109\lib\net461\Suplex.Security.FileSystemDal.dll</HintPath>
     </Reference>
     <Reference Include="Suplex.Security.Utilities.ActiveDirectory, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Suplex.Security.Utilities.ActiveDirectory.1.0.19009\lib\net461\Suplex.Security.Utilities.ActiveDirectory.dll</HintPath>
     </Reference>
     <Reference Include="Suplex.Security.Utilities.Json, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Suplex.Security.Utilities.Json.1.0.19001\lib\net461\Suplex.Security.Utilities.Json.dll</HintPath>
+      <HintPath>..\packages\Suplex.Security.Utilities.Json.1.0.19109\lib\net461\Suplex.Security.Utilities.Json.dll</HintPath>
     </Reference>
     <Reference Include="Suplex.Security.Utilities.Yaml, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Suplex.Security.Utilities.Yaml.1.0.19001\lib\net461\Suplex.Security.Utilities.Yaml.dll</HintPath>
+      <HintPath>..\packages\Suplex.Security.Utilities.Yaml.1.0.19109\lib\net461\Suplex.Security.Utilities.Yaml.dll</HintPath>
     </Reference>
     <Reference Include="Suplex.Security.WebApi.HttpClient, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Suplex.Security.WebApi.HttpClient.1.0.19001\lib\net461\Suplex.Security.WebApi.HttpClient.dll</HintPath>
+      <HintPath>..\packages\Suplex.Security.WebApi.HttpClient.1.0.19064\lib\net461\Suplex.Security.WebApi.HttpClient.dll</HintPath>
     </Reference>
     <Reference Include="Synapse.Controller.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Synapse.Controller.Common.1.0.19010\lib\net461\Synapse.Controller.Common.dll</HintPath>
     </Reference>
     <Reference Include="Synapse.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a6de1cc56b73f982, processorArchitecture=MSIL">
-      <HintPath>..\packages\Synapse.Core.Signed.1.0.18350\lib\net461\Synapse.Core.dll</HintPath>
+      <HintPath>..\packages\Synapse.Core.Signed.1.0.19092\lib\net461\Synapse.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -85,8 +85,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="YamlDotNet, Version=5.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-      <HintPath>..\packages\YamlDotNet.Signed.5.2.1\lib\net45\YamlDotNet.dll</HintPath>
+    <Reference Include="YamlDotNet, Version=6.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.6.0.0\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="Zephyr.Filesystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Zephyr.FileSystem.1.0.18296.0\lib\net452\Zephyr.Filesystem.dll</HintPath>
@@ -101,7 +101,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\AWSSDK.S3.3.3.26.1\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
